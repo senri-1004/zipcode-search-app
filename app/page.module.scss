@@ -1,0 +1,55 @@
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 24px;
+}
+
+.searchArea {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.error {
+  color: red;
+  margin-top: 8px;
+}
+
+.result {
+   margin-top: 24px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  background: white;
+}
+
+.history {
+  margin-top: 32px;
+}
+
+
+.historyCard {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.historyCard:hover {
+  background: #f5f5f5;
+}
+.searchButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
+
+.searchButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}

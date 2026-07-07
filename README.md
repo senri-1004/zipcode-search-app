@@ -21,6 +21,16 @@
 - LocalStorageによる履歴保持
 - Enterキーで検索
 - 複数検索結果対応
+- カルーセルによる履歴表示
+- レスポンシブ対応
+
+## デモ
+
+https://zipcode-search-app-y43n.vercel.app/
+
+## Node.js
+
+v22.x
 
 ## セットアップ
 
@@ -30,10 +40,8 @@ cd zipcode-search-app
 npm install
 npm run dev
 ```
-
 ブラウザで以下にアクセスしてください。
 
-```text
 http://localhost:3000
 ```
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./page.module.scss";
 
  type AddressResult = {
@@ -21,6 +21,21 @@ const [result, setResult] = useState<AddressResult | null>(null);
 const [histories, setHistories] = useState<AddressResult[]>([]);
   const [error, setError] = useState("");
 const [loading, setLoading] = useState(false);
+useEffect(() => {
+  const savedHistories =
+    localStorage.getItem("histories");
+
+  if (savedHistories) {
+    setHistories(JSON.parse(savedHistories));
+  }
+}, []);
+
+useEffect(() => {
+  localStorage.setItem(
+    "histories",
+    JSON.stringify(histories)
+  );
+}, [histories]);
 
 const clearHistory = () => {
   setHistories([]);
@@ -72,6 +87,7 @@ setHistories((prev) => [
     (item) => item.zipcode !== address.zipcode
   ),
 ]);
+
   } catch {
     setError("エラーが発生しました。");
     setResult(null);

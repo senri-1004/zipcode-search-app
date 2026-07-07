@@ -17,7 +17,7 @@ export default function Home() {
   const [zipcode, setZipcode] = useState("");
  
 
-const [result, setResult] = useState<AddressResult | null>(null);
+const [results, setResults] = useState<AddressResult[]>([]);
 const [histories, setHistories] = useState<AddressResult[]>([]);
   const [error, setError] = useState("");
 const [loading, setLoading] = useState(false);
@@ -74,23 +74,24 @@ try {
 
 if (!data.results) {
   setError("郵便番号が存在しません。");
-  setResult(null);
+  setResults([]);
   return;
 }
 
+setResults(data.results);
+
 const address = data.results[0];
-  setResult(address);
 
 setHistories((prev) => [
   address,
   ...prev.filter(
     (item) => item.zipcode !== address.zipcode
   ),
-]);
+  ].slice(0, 9));
 
   } catch {
     setError("エラーが発生しました。");
-    setResult(null);
+    setResults([]);
   } finally {
     setLoading(false);
   }
@@ -137,30 +138,32 @@ setHistories((prev) => [
     {error}
   </p>
 )}
-      {result && (
+      {results.length > 0 && (
   <div className={styles.result}>
     <h2>検索結果</h2>
 
-    <p>
-      郵便番号: {result.zipcode}
-    </p>
+   {results.map((item, index) => (
+  <div key={`${item.zipcode}-${index}`}>
 
-    <p>
-      住所:
-      {result.address1}
-      {result.address2}
-      {result.address3}
-    </p>
+        <p>
+          住所:
+          {item.address1}
+          {item.address2}
+          {item.address3}
+        </p>
 
-    <p>
-      カナ:
-      {result.kana1}
-      {result.kana2}
-      {result.kana3}
-    </p>
+        <p>
+          カナ:
+          {item.kana1}
+          {item.kana2}
+          {item.kana3}
+        </p>
+
+        <hr />
+      </div>
+    ))}
   </div>
 )}
-
 
 {histories.length > 0 && (
   <div className={styles.history}>
@@ -174,7 +177,7 @@ setHistories((prev) => [
       <div
         key={item.zipcode}
         className={styles.historyCard}
-         onClick={() => setResult(item)}
+         onClick={() => setResults([item])}
       >
         <p>{item.zipcode}</p>
 

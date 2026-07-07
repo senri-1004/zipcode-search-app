@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./page.module.scss";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 
  type AddressResult = {
   zipcode: string;
@@ -19,8 +21,10 @@ export default function Home() {
 
 const [results, setResults] = useState<AddressResult[]>([]);
 const [histories, setHistories] = useState<AddressResult[]>([]);
-  const [error, setError] = useState("");
+const [currentPage, setCurrentPage] = useState(0);
+const [error, setError] = useState("");
 const [loading, setLoading] = useState(false);
+const swiperRef = useRef<any>(null);
 useEffect(() => {
   const savedHistories =
     localStorage.getItem("histories");
@@ -39,7 +43,19 @@ useEffect(() => {
 
 const clearHistory = () => {
   setHistories([]);
+  setCurrentPage(0);
 };
+
+const itemsPerPage = 3;
+
+const displayedHistories = histories.slice(
+  currentPage * itemsPerPage,
+  (currentPage + 1) * itemsPerPage
+);
+
+const totalPages = Math.ceil(
+  histories.length / itemsPerPage
+);
 
   const handleSearch = async () => {
     setError("");
@@ -88,6 +104,9 @@ setHistories((prev) => [
     (item) => item.zipcode !== address.zipcode
   ),
   ].slice(0, 9));
+
+  setCurrentPage(0);
+swiperRef.current?.slideTo(0);
 
   } catch {
     setError("エラーが発生しました。");
@@ -173,22 +192,76 @@ setHistories((prev) => [
   履歴を削除
 </button>
 
-    {histories.map((item) => (
-      <div
-        key={item.zipcode}
-        className={styles.historyCard}
-         onClick={() => setResults([item])}
-      >
-        <p>{item.zipcode}</p>
+<div className={styles.pagination}>
 
-        <p>
-          {item.address1}
-          {item.address2}
-          {item.address3}
-        </p>
-      </div>
-    ))}
+  <button
+   onClick={() => {
+  swiperRef.current?.slidePrev();
+}}
+    disabled={currentPage === 0}
+  >
+    戻る
+  </button>
+
+  <span>
+    {currentPage + 1} / {totalPages}
+  </span>
+
+  <button
+    onClick={() => {
+  swiperRef.current?.slideNext();
+}}
+    disabled={currentPage === totalPages - 1}
+  >
+    進む
+  </button>
+</div>
+
+<Swiper
+  slidesPerView={1}
+  spaceBetween={20}
+  onSwiper={(swiper) => {
+    swiperRef.current = swiper;
+  }}
+  onSlideChange={(swiper) => {
+    setCurrentPage(swiper.activeIndex);
+  }}
+>
+  {Array.from(
+    { length: totalPages },
+    (_, pageIndex) => (
+      <SwiperSlide key={pageIndex}>
+        <div className={styles.historyList}>
+          {histories
+            .slice(
+              pageIndex * itemsPerPage,
+              (pageIndex + 1) * itemsPerPage
+            )
+            .map((item) => (
+              <div
+                key={item.zipcode}
+                className={styles.historyCard}
+                onClick={() =>
+                  setResults([item])
+                }
+              >
+                <p>{item.zipcode}</p>
+
+                <p>
+                  {item.address1}
+                  {item.address2}
+                  {item.address3}
+                </p>
+              </div>
+            ))}
+        </div>
+      </SwiperSlide>
+    )
+  )}
+</Swiper>
+
   </div>
+
 )}
     </main>
   );

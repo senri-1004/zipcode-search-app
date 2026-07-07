@@ -53,3 +53,27 @@
   background: #9ca3af;
   cursor: not-allowed;
 }
+
+.history button {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.pagination {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.historyList {
+  display: grid;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .historyList {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

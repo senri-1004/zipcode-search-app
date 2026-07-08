@@ -1,268 +1,87 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import styles from "./page.module.scss";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
 
- type AddressResult = {
-  zipcode: string;
-  address1: string;
-  address2: string;
-  address3: string;
-  kana1: string;
-  kana2: string;
-  kana3: string;
-};
+async function callHandler(path: "greet" | "goodbye", name: string): Promise<string> {
+  const response = await fetch(`/api/${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) {
+    throw new Error("リクエストに失敗しました。");
+  }
+
+  return response.text();
+}
 
 export default function Home() {
-  const [zipcode, setZipcode] = useState("");
- 
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-const [results, setResults] = useState<AddressResult[]>([]);
-const [histories, setHistories] = useState<AddressResult[]>([]);
-const [currentPage, setCurrentPage] = useState(0);
-const [error, setError] = useState("");
-const [loading, setLoading] = useState(false);
-const swiperRef = useRef<any>(null);
-useEffect(() => {
-  const savedHistories =
-    localStorage.getItem("histories");
-
-  if (savedHistories) {
-    setHistories(JSON.parse(savedHistories));
-  }
-}, []);
-
-useEffect(() => {
-  localStorage.setItem(
-    "histories",
-    JSON.stringify(histories)
-  );
-}, [histories]);
-
-const clearHistory = () => {
-  setHistories([]);
-  setCurrentPage(0);
-};
-
-const itemsPerPage = 3;
-
-const displayedHistories = histories.slice(
-  currentPage * itemsPerPage,
-  (currentPage + 1) * itemsPerPage
-);
-
-const totalPages = Math.ceil(
-  histories.length / itemsPerPage
-);
-
-  const handleSearch = async () => {
+  const handleAction = async (path: "greet" | "goodbye") => {
     setError("");
-setLoading(true);
+    setMessage("");
 
-const charPattern = /^[0-9-]+$/;
+    if (!name.trim()) {
+      setError("名前を入力してください。");
+      return;
+    }
 
-if (!charPattern.test(zipcode)) {
-  setError(
-    "郵便番号は半角数字のみまたは半角数字とハイフンのみで入力してください。"
-  );
-  setLoading(false);
-  return;
-}
+    setLoading(true);
 
-const formatPattern = /^\d{7}$|^\d{3}-\d{4}$/;
-
-if (!formatPattern.test(zipcode)) {
-  setError(
-    "郵便番号は半角数字でハイフンありの8桁かハイフンなしの7桁で入力してください。"
-  );
-  setLoading(false);
-  return;
-}
-
-try {
-    const response = await fetch(
-      `https://zipcloud.ibsnet.co.jp/api/search?zipcode=${zipcode.replace("-", "")}`
-    );
-
-  const data = await response.json();
-
-if (!data.results) {
-  setError("郵便番号が存在しません。");
-  setResults([]);
-  return;
-}
-
-setResults(data.results);
-
-const address = data.results[0];
-
-setHistories((prev) => [
-  address,
-  ...prev.filter(
-    (item) => item.zipcode !== address.zipcode
-  ),
-  ].slice(0, 9));
-
-  setCurrentPage(0);
-swiperRef.current?.slideTo(0);
-
-  } catch {
-    setError("エラーが発生しました。");
-    setResults([]);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      const result = await callHandler(path, name.trim());
+      setMessage(result);
+    } catch {
+      setError("エラーが発生しました。");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className={styles.container}>
-      <h1>住所検索</h1>
+      <h1>Welcome Site</h1>
+      <p>名前を入力して、挨拶またはお別れのメッセージを表示できます。</p>
 
-      <p>
-        郵便番号を入力して住所を検索してください。
-      </p>
-
-      <div className={styles.searchArea}>
-
+      <div className={styles.form}>
+        <label htmlFor="name">名前</label>
         <input
+          id="name"
           type="text"
-          maxLength={8}
-          placeholder="100-0001"
-          value={zipcode}
-          onChange={(e) => setZipcode(e.target.value)}
-  onKeyDown={(e) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  }}
-/>
+          placeholder="Taro"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+        />
 
- <button
-  className={styles.searchButton}
-  onClick={handleSearch}
-  disabled={loading || zipcode === ""}
->
-
-  検索
-</button>
-        {loading && (
-  <p>検索中...</p>
-)}
-      </div>
-      {error && (
-  <p className={styles.error}>
-
-    {error}
-  </p>
-)}
-      {results.length > 0 && (
-  <div className={styles.result}>
-    <h2>検索結果</h2>
-
-   {results.map((item, index) => (
-  <div key={`${item.zipcode}-${index}`}>
-
-        <p>
-          住所:
-          {item.address1}
-          {item.address2}
-          {item.address3}
-        </p>
-
-        <p>
-          カナ:
-          {item.kana1}
-          {item.kana2}
-          {item.kana3}
-        </p>
-
-        <hr />
-      </div>
-    ))}
-  </div>
-)}
-
-{histories.length > 0 && (
-  <div className={styles.history}>
-    <h2>検索履歴</h2>
-
-<button onClick={clearHistory}>
-  履歴を削除
-</button>
-
-<div className={styles.pagination}>
-
-  <button
-   onClick={() => {
-  swiperRef.current?.slidePrev();
-}}
-    disabled={currentPage === 0}
-  >
-    戻る
-  </button>
-
-  <span>
-    {currentPage + 1} / {totalPages}
-  </span>
-
-  <button
-    onClick={() => {
-  swiperRef.current?.slideNext();
-}}
-    disabled={currentPage === totalPages - 1}
-  >
-    進む
-  </button>
-</div>
-
-<Swiper
-  slidesPerView={1}
-  spaceBetween={20}
-  onSwiper={(swiper) => {
-    swiperRef.current = swiper;
-  }}
-  onSlideChange={(swiper) => {
-    setCurrentPage(swiper.activeIndex);
-  }}
->
-  {Array.from(
-    { length: totalPages },
-    (_, pageIndex) => (
-      <SwiperSlide key={pageIndex}>
-        <div className={styles.historyList}>
-          {histories
-            .slice(
-              pageIndex * itemsPerPage,
-              (pageIndex + 1) * itemsPerPage
-            )
-            .map((item) => (
-              <div
-                key={item.zipcode}
-                className={styles.historyCard}
-                onClick={() =>
-                  setResults([item])
-                }
-              >
-                <p>{item.zipcode}</p>
-
-                <p>
-                  {item.address1}
-                  {item.address2}
-                  {item.address3}
-                </p>
-              </div>
-            ))}
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={() => handleAction("greet")}
+            disabled={loading}
+          >
+            Greet
+          </button>
+          <button
+            type="button"
+            className={styles.secondaryButton}
+            onClick={() => handleAction("goodbye")}
+            disabled={loading}
+          >
+            Goodbye
+          </button>
         </div>
-      </SwiperSlide>
-    )
-  )}
-</Swiper>
+      </div>
 
-  </div>
-
-)}
+      {loading && <p className={styles.status}>送信中...</p>}
+      {error && <p className={styles.error}>{error}</p>}
+      {message && <p className={styles.message}>{message}</p>}
     </main>
   );
 }

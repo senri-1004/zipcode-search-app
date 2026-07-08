@@ -1,79 +1,70 @@
 .container {
-  max-width: 800px;
-  margin: 40px auto;
+  max-width: 560px;
+  margin: 48px auto;
   padding: 24px;
 }
 
-.searchArea {
+.form {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.form label {
+  font-weight: 600;
+}
+
+.form input {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+.actions {
   display: flex;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.error {
-  color: red;
+  gap: 12px;
   margin-top: 8px;
 }
 
-.result {
-   margin-top: 24px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 16px;
-  background: white;
-}
-
-.history {
-  margin-top: 32px;
-}
-
-
-.historyCard {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 12px;
-  margin-top: 8px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.historyCard:hover {
-  background: #f5f5f5;
-}
-.searchButton {
-  padding: 8px 16px;
+.primaryButton,
+.secondaryButton {
+  padding: 10px 16px;
   border: none;
   border-radius: 8px;
-  background: #2563eb;
-  color: white;
   cursor: pointer;
 }
 
-.searchButton:disabled {
-  background: #9ca3af;
+.primaryButton {
+  background: #2563eb;
+  color: white;
+}
+
+.secondaryButton {
+  background: #374151;
+  color: white;
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-.history button {
-  margin-bottom: 12px;
-  padding: 8px 12px;
-  cursor: pointer;
+.status {
+  margin-top: 16px;
+  color: #6b7280;
 }
 
-.pagination {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 16px;
+.error {
+  margin-top: 16px;
+  color: #dc2626;
 }
 
-.historyList {
-  display: grid;
-  gap: 12px;
-}
-
-@media (min-width: 768px) {
-  .historyList {
-    grid-template-columns: repeat(3, 1fr);
-  }
+.message {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+  font-size: 1.125rem;
 }
